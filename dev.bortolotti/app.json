@@ -29,6 +29,16 @@
     "name": "Bortolotti Dev",
     "email": "29543986+bortolottidev@users.noreply.github.com"
   },
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "bortolottidev"
+      }
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/bortolottidev/homey-elmax-app/issues"
+  },
   "drivers": [
     {
       "name": {
