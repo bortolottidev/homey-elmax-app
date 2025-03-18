@@ -1,0 +1,6 @@
+{
+  "errors": {
+    "not_authorized": "Non autorizzato. Controlla il PIN inserito nelle impostazioni e riprova",
+    "missing_pin": "Il PIN del device non è ancora stato impostato. Vai in Impostazioni > Advanced Settings e riprova"
+  }
+}

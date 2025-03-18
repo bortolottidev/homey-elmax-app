@@ -1,0 +1,37 @@
+{
+  "id": "dev.bortolotti",
+  "version": "1.0.0",
+  "compatibility": ">=5.0.0",
+  "sdk": 3,
+  "platforms": ["local"],
+  "name": {
+    "en": "Elmax Phantom64",
+    "it": "Elmax Phantom64"
+  },
+  "brandColor": "#44B1EF",
+  "description": {
+    "en": "Homey & Elmax: Connected security, protected home.",
+    "it": "Homey & Elmax: Sicurezza connessa, casa protetta."
+  },
+  "category": ["security"],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.jpeg",
+    "large": "/assets/images/large.jpeg",
+    "xlarge": "/assets/images/xlarge.jpeg"
+  },
+  "author": {
+    "name": "Bortolotti Dev",
+    "email": "29543986+bortolottidev@users.noreply.github.com"
+  },
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "bortolottidev"
+      }
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/bortolottidev/homey-elmax-app/issues"
+  }
+}

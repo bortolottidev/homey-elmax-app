@@ -1,0 +1,16 @@
+[
+  {
+    "id": "device_pin",
+    "highlight": true,
+    "type": "password",
+    "label": {
+      "en": "Account PIN",
+      "it": "PIN del tuo account"
+    },
+    "value": "",
+    "hint": {
+      "en": "Insert your account PIN",
+      "it": "Inserisci il PIN del tuo account dopo averlo creato sulla centralina"
+    }
+  }
+]

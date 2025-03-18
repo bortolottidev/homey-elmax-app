@@ -1,0 +1,9 @@
+{
+  "type": "mdns-sd",
+  "mdns-sd": {
+    "name": "_elmax-ssl",
+    "protocol": "tcp"
+  },
+  "id": "{{txt.idr}}"
+}
+

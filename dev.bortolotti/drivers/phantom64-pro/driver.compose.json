@@ -1,0 +1,39 @@
+{
+  "name": {
+    "en": "Phantom64 Pro"
+  },
+  "class": "homealarm",
+  "capabilities": ["alarm_generic", "homealarm_state"],
+  "platforms": ["local"],
+  "connectivity": ["lan"],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": {
+        "next": "add_devices"
+      },
+      "options": { "singular": true }
+    },
+    {
+      "id": "pincode",
+      "comment": "actually skip for semplcity sake",
+      "template": "pincode",
+      "options": {
+        "title": "Login with your account PIN",
+        "hint": "Enter the Elmax alarm pincode. Consider the idea to create a new one only for Homey",
+        "type": "number",
+        "length": 6
+      }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ]
+}

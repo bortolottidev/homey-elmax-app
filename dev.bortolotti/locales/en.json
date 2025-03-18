@@ -1,0 +1,7 @@
+{
+  "errors": {
+    "not_authorized": "Not authorized. Please check the inserted PIN an retry",
+    "missing_pin": "Missing device PIN. Please set it in settings and retry"
+  }
+}
+
