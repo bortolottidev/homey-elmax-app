@@ -1,5 +1,5 @@
-import Homey from "homey";
-import { PairSession } from "homey/lib/Driver";
+import Homey from 'homey';
+import { PairSession } from 'homey/lib/Driver';
 
 export type StoredData = {
   address: `${number}.${number}.${number}.${number}`;
@@ -7,11 +7,11 @@ export type StoredData = {
 
 module.exports = class Phantom64ProDriver extends Homey.Driver {
   async onInit() {
-    this.log("Driver Phantom64ProDriver has been initialized");
+    this.log('Driver Phantom64ProDriver has been initialized');
   }
 
   async onPair(session: PairSession) {
-    session.setHandler("list_devices", this.onPairListDevices.bind(this));
+    session.setHandler('list_devices', this.onPairListDevices.bind(this));
 
     // session.setHandler("pincode", async (pincode: string[]) => {
     //   // { singular: true } allow to just get the first one
@@ -37,15 +37,15 @@ module.exports = class Phantom64ProDriver extends Homey.Driver {
    */
   async onPairListDevices() {
     const straregyDiscovery = this.homey.discovery.getStrategy(
-      "lookup-elmax-videobox",
+      'lookup-elmax-videobox',
     );
     const discoveryResults = straregyDiscovery.getDiscoveryResults();
     const videoboxesFound = [];
     for (const [id, data] of Object.entries(discoveryResults)) {
       // check mdnssd strategy
-      if ("name" in data) {
+      if ('name' in data) {
         videoboxesFound.push({
-          name: "Phantom64 Pro",
+          name: 'Phantom64 Pro',
           data: {
             id: `VideoBox-${id}`,
             discoveryName: data.name,

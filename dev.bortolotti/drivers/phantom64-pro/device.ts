@@ -1,24 +1,24 @@
-import Homey from "homey";
-import { StoredData } from "./driver";
+import Homey from 'homey';
+import { StoredData } from './driver';
 
 export const askToken = async (
-  address: StoredData["address"],
+  address: StoredData['address'],
   pin: string,
   i18nFn: (key: string) => string,
 ): Promise<string> => {
   const body = JSON.stringify({ pin });
 
   const res = await fetch(`http://${address}/api/v2/login`, {
-    method: "POST",
+    method: 'POST',
     body,
     headers: {
-      Host: "Homey",
-      "Content-Type": "application/json",
+      Host: 'Homey',
+      'Content-Type': 'application/json',
     },
   });
 
   if (!res.ok && res.status === 403) {
-    const errorMsg = i18nFn("errors.not_authorized");
+    const errorMsg = i18nFn('errors.not_authorized');
     throw new Error(errorMsg);
   } else if (!res.ok) {
     throw new Error(res.statusText);
@@ -28,21 +28,21 @@ export const askToken = async (
 };
 
 export const findAllAreas = async (
-  address: StoredData["address"],
+  address: StoredData['address'],
   authToken: string,
   i18nFn: (key: string) => string,
 ) => {
   const res = await fetch(`http://${address}/api/v2/discovery`, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      Host: "Homey",
-      "Content-Type": "application/json",
+      Host: 'Homey',
+      'Content-Type': 'application/json',
       Authorization: authToken,
     },
   });
 
   if (!res.ok && res.status === 403) {
-    const errorMsg = i18nFn("errors.not_authorized");
+    const errorMsg = i18nFn('errors.not_authorized');
     throw new Error(errorMsg);
   } else if (!res.ok) {
     throw new Error(res.statusText);
@@ -54,33 +54,33 @@ export const findAllAreas = async (
 };
 
 export const modifyArmStatus = async (
-  address: StoredData["address"],
+  address: StoredData['address'],
   pin: string,
   authToken: string,
   areaEndpointId: string,
-  status: "armed" | "disarmed" | "partially_armed",
+  status: 'armed' | 'disarmed' | 'partially_armed',
 ): Promise<void> => {
-  const body = JSON.stringify(status === "disarmed" ? { code: pin } : {});
-  let statusCode = "unknown";
-  if (status === "armed") {
-    statusCode = "4";
+  const body = JSON.stringify(status === 'disarmed' ? { code: pin } : {});
+  let statusCode = 'unknown';
+  if (status === 'armed') {
+    statusCode = '4';
   }
-  if (status === "partially_armed") {
-    statusCode = "1";
+  if (status === 'partially_armed') {
+    statusCode = '1';
   }
-  if (status === "disarmed") {
-    statusCode = "0";
+  if (status === 'disarmed') {
+    statusCode = '0';
   }
 
   const res = await fetch(
     `http://${address}/api/v2/cmd/${areaEndpointId}/${statusCode}`,
     {
-      method: "POST",
+      method: 'POST',
       body,
       headers: {
-        Host: "Homey",
-        "Content-Type": "application/json",
-        "Content-Length": Buffer.byteLength(body).toString(),
+        Host: 'Homey',
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body).toString(),
         Authorization: authToken,
       },
     },
@@ -92,9 +92,9 @@ export const modifyArmStatus = async (
   }
 
   const armResponse = (await res.json()) as { message: string };
-  console.log("command response", armResponse);
-  if (armResponse.message !== "Command Sent") {
-    throw new Error("Unexpected confirm response");
+  console.log('command response', armResponse);
+  if (armResponse.message !== 'Command Sent') {
+    throw new Error('Unexpected confirm response');
   }
 };
 
@@ -105,36 +105,36 @@ module.exports = class Phantom64ProDevice extends Homey.Device {
    * onInit is called when the device is initialized.
    */
   async onInit() {
-    this.registerCapabilityListener("alarm_generic", (value: boolean) => {
+    this.registerCapabilityListener('alarm_generic', (value: boolean) => {
       this.log({ armedAlarm: value });
     });
 
     this.registerCapabilityListener(
-      "homealarm_state",
-      async (value: "armed" | "disarmed" | "partially_armed") => {
-        const devicePIN = this.getSetting("device_pin");
+      'homealarm_state',
+      async (value: 'armed' | 'disarmed' | 'partially_armed') => {
+        const devicePIN = this.getSetting('device_pin');
         if (!devicePIN) {
-          const missingPinErrorMsg = this.homey.__("errors.missing_pin");
+          const missingPinErrorMsg = this.homey.__('errors.missing_pin');
           throw new Error(missingPinErrorMsg);
         }
 
         const { address } = this.getStore() as StoredData;
 
-        this.log("gettin token");
+        this.log('gettin token');
         const token = await askToken(address, devicePIN, this.homey.__);
 
         if (!this.areaEndpointId) {
           const areas = await findAllAreas(address, token, this.homey.__);
           if (!areas || areas.length !== 1) {
-            throw new Error("Error while looking for area");
+            throw new Error('Error while looking for area');
           }
 
           const { endpointId, nome } = areas[0];
-          this.log("Found endpoint area: ", nome);
+          this.log('Found endpoint area: ', nome);
           this.areaEndpointId = endpointId;
         }
 
-        this.log("modify status");
+        this.log('modify status');
         await modifyArmStatus(
           address,
           devicePIN,
@@ -145,19 +145,19 @@ module.exports = class Phantom64ProDevice extends Homey.Device {
 
         // update alarm status
         await this.setCapabilityValue(
-          "alarm_generic",
-          value === "armed" || value === "partially_armed",
+          'alarm_generic',
+          value === 'armed' || value === 'partially_armed',
         ).catch(this.error);
       },
     );
-    this.log("Phantom64ProDevice has been initialized");
+    this.log('Phantom64ProDevice has been initialized');
   }
 
   /**
    * onAdded is called when the user adds the device, called just after pairing.
    */
   async onAdded() {
-    this.log("Phantom64ProDevice has been added");
+    this.log('Phantom64ProDevice has been added');
   }
 
   /**
@@ -181,7 +181,7 @@ module.exports = class Phantom64ProDevice extends Homey.Device {
     };
     changedKeys: string[];
   }): Promise<string | void> {
-    this.log("Phantom64ProDevice settings where changed");
+    this.log('Phantom64ProDevice settings where changed');
   }
 
   /**
@@ -190,13 +190,13 @@ module.exports = class Phantom64ProDevice extends Homey.Device {
    * @param {string} name The new name
    */
   async onRenamed(name: string) {
-    this.log("Phantom64ProDevice was renamed");
+    this.log('Phantom64ProDevice was renamed');
   }
 
   /**
    * onDeleted is called when the user deleted the device.
    */
   async onDeleted() {
-    this.log("Phantom64ProDevice has been deleted");
+    this.log('Phantom64ProDevice has been deleted');
   }
 };
