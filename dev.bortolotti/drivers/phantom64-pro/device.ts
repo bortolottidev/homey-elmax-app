@@ -53,6 +53,43 @@ export const findAllAreas = async (
   ).aree;
 };
 
+export const getAreaStatus = async (
+  address: StoredData['address'],
+  authToken: string,
+  areaEndpointId: string,
+): Promise<'armed' | 'disarmed' | 'partially_armed'> => {
+  const res = await fetch(`http://${address}/api/v2/status/${areaEndpointId}`, {
+    method: 'GET',
+    headers: {
+      Host: 'Homey',
+      'Content-Type': 'application/json',
+      Authorization: authToken,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(res.statusText);
+  }
+
+  const data = (await res.json()) as {
+    aree: { endpointId: string; stato: number }[];
+  };
+
+  const area = data.aree.find((a) => a.endpointId === areaEndpointId);
+  if (!area) {
+    throw new Error('Area not found');
+  }
+
+  const { stato } = area;
+  if (stato === 0) {
+    return 'disarmed';
+  }
+  if (stato === 1) {
+    return 'partially_armed';
+  }
+  return 'armed';
+};
+
 export const modifyArmStatus = async (
   address: StoredData['address'],
   pin: string,
@@ -87,12 +124,10 @@ export const modifyArmStatus = async (
   );
 
   if (!res.ok) {
-    console.error(res);
-    throw new Error(res.statusText);
+    throw res;
   }
 
   const armResponse = (await res.json()) as { message: string };
-  console.log('command response', armResponse);
   if (armResponse.message !== 'Command Sent') {
     throw new Error('Unexpected confirm response');
   }
@@ -100,6 +135,41 @@ export const modifyArmStatus = async (
 
 module.exports = class Phantom64ProDevice extends Homey.Device {
   public areaEndpointId: string | null = null;
+  private pollingIntervalId: NodeJS.Timeout | null = null;
+
+  private async updateAlarmStatus(): Promise<void> {
+    const devicePIN = this.getSetting('device_pin');
+    if (!devicePIN) {
+      return;
+    }
+
+    const { address } = this.getStore() as StoredData;
+
+    try {
+      const token = await askToken(address, devicePIN, this.homey.__);
+
+      if (!this.areaEndpointId) {
+        const areas = await findAllAreas(address, token, this.homey.__);
+        if (!areas || areas.length !== 1) {
+          this.error('Error while looking for area');
+          return;
+        }
+        const { endpointId } = areas[0];
+        this.areaEndpointId = endpointId;
+      }
+
+      const status = await getAreaStatus(address, token, this.areaEndpointId);
+      await this.setCapabilityValue('homealarm_state', status);
+      await this.setCapabilityValue(
+        'alarm_generic',
+        status === 'armed' || status === 'partially_armed',
+      );
+
+      this.log(`Alarm status updated: ${status}`);
+    } catch (err) {
+      this.error('Failed to update alarm status:', err);
+    }
+  }
 
   /**
    * onInit is called when the device is initialized.
@@ -120,7 +190,6 @@ module.exports = class Phantom64ProDevice extends Homey.Device {
 
         const { address } = this.getStore() as StoredData;
 
-        this.log('gettin token');
         const token = await askToken(address, devicePIN, this.homey.__);
 
         if (!this.areaEndpointId) {
@@ -130,26 +199,38 @@ module.exports = class Phantom64ProDevice extends Homey.Device {
           }
 
           const { endpointId, nome } = areas[0];
-          this.log('Found endpoint area: ', nome);
+          this.log(`Found endpoint area: ${nome}`);
           this.areaEndpointId = endpointId;
         }
 
-        this.log('modify status');
-        await modifyArmStatus(
-          address,
-          devicePIN,
-          token,
-          this.areaEndpointId,
-          value,
-        );
+        try {
+          await modifyArmStatus(
+            address,
+            devicePIN,
+            token,
+            this.areaEndpointId,
+            value,
+          );
 
-        // update alarm status
-        await this.setCapabilityValue(
-          'alarm_generic',
-          value === 'armed' || value === 'partially_armed',
-        ).catch(this.error);
+          await this.setCapabilityValue(
+            'alarm_generic',
+            value === 'armed' || value === 'partially_armed',
+          ).catch(this.error);
+
+          this.log(`Alarm state changed to: ${value}`);
+        } catch (error) {
+          this.error('Cannot update status', error);
+        }
       },
     );
+
+    // eslint-disable-next-line homey-app/global-timers
+    this.pollingIntervalId = setInterval(() => {
+      this.updateAlarmStatus().catch(this.error);
+    }, 15 * 60 * 1000);
+
+    await this.updateAlarmStatus();
+
     this.log('Phantom64ProDevice has been initialized');
   }
 
@@ -197,6 +278,10 @@ module.exports = class Phantom64ProDevice extends Homey.Device {
    * onDeleted is called when the user deleted the device.
    */
   async onDeleted() {
+    if (this.pollingIntervalId) {
+      clearInterval(this.pollingIntervalId);
+      this.pollingIntervalId = null;
+    }
     this.log('Phantom64ProDevice has been deleted');
   }
 };
