@@ -10,8 +10,8 @@
   },
   "brandColor": "#44B1EF",
   "description": {
-    "en": "Homey & Elmax: Connected security, protected home.",
-    "it": "Homey & Elmax: Sicurezza connessa, casa protetta."
+    "en": "Connected security, protected home",
+    "it": "Sicurezza connessa, casa protetta"
   },
   "category": ["security"],
   "permissions": [],
