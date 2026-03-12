@@ -1,5 +1,8 @@
 {
   "1.0.0": {
     "en": "first release"
+  },
+  "1.0.1": {
+    "en": "add polling to keep homey state sync when user change manually elmax state"
   }
 }

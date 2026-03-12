@@ -1,9 +1,11 @@
 {
   "id": "dev.bortolotti",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "compatibility": ">=5.0.0",
   "sdk": 3,
-  "platforms": ["local"],
+  "platforms": [
+    "local"
+  ],
   "name": {
     "en": "Elmax Phantom64",
     "it": "Elmax Phantom64"
@@ -13,7 +15,9 @@
     "en": "Connected security, protected home",
     "it": "Sicurezza connessa, casa protetta"
   },
-  "category": ["security"],
+  "category": [
+    "security"
+  ],
   "permissions": [],
   "images": {
     "small": "/assets/images/small.jpeg",
